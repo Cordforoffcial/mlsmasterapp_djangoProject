@@ -1,0 +1,1089 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Materials Testing</title>
+    {% csrf_token %}
+    <link rel="stylesheet" href="{% static 'amt/amt.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Any page-specific overrides can go here */
+        .excel-btn {
+            text-decoration: none;
+            color: inherit;
+            padding: 8px 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: inline-block;
+        }
+        
+        .excel-btn:hover {
+            background: #d97706;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Login Modal Styles */
+        .login-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+        }
+        
+        .login-modal-content {
+            background-color: #ffffff;
+            margin: 10% auto;
+            padding: 0;
+            border: none;
+            border-radius: 15px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .login-modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            position: relative;
+        }
+        
+        .login-modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .login-close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        
+        .login-close:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        .login-modal-body {
+            padding: 30px;
+        }
+        
+        .login-form-group {
+            margin-bottom: 20px;
+        }
+        
+        .login-form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .login-form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .login-form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .login-error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .login-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .login-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .login-btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .login-btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .login-btn-submit:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .login-btn-cancel {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .login-btn-cancel:hover {
+            background: #7f8c8d;
+        }
+
+        /* Login Required Overlay */
+        .login-required-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-required-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            margin: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .login-required-content h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        
+        .login-required-content p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .login-required-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .login-required-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Disabled state for form elements */
+        .content-disabled {
+            pointer-events: none;
+            opacity: 0.3;
+            filter: blur(2px);
+        }
+        
+        /* Lock icon for visual indication */
+        .lock-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        /* Success Message */
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+            z-index: 3000;
+            display: none;
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 25px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .navbar-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .home-btn {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s ease;
+        }
+
+        .home-btn:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+        .login-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 15px;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-left: 15px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+        
+        /* Footer Styles */
+        .footer {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            margin-top: 50px;
+            text-align: center;
+            border-top: 3px solid #5a67d8;
+        }
+        
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .footer-version {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .footer-developer {
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        
+        .footer-updated {
+            font-size: 12px;
+            opacity: 0.8;
+            font-style: italic;
+        }
+        
+        .footer hr {
+            border: none;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 20px 0;
+        }
+    </style>
+    <script src="{% static 'amt/amt.js' %}"></script>
+</head>
+<body>
+    <!-- Success Message -->
+    <div id="successMessage" class="success-message">
+        <strong>✓ Successfully Logged In!</strong>
+        <p>Welcome to Advanced Materials Testing.</p>
+    </div>
+
+    <!-- Login Required Overlay -->
+    <div id="loginRequiredOverlay" class="login-required-overlay">
+        <div class="login-required-content">
+            <div class="lock-icon">🔒</div>
+            <h2>Login Required</h2>
+            <p>You must be logged in to access the Advanced Materials Testing system. Please log in to continue with your testing procedures.</p>
+            <button class="login-required-btn" onclick="showLoginModal()">
+                Login to Continue
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="navbar-left">
+            <button class="home-btn" onclick="goHome()">
+                🏠 Home
+            </button>
+        </div>
+        
+        <div class="navbar-right">
+            <!-- Login Button -->
+            <button id="loginButton" class="login-button" onclick="showLoginModal()">
+                Login
+            </button>
+            
+            <!-- User Info (hidden by default) -->
+            <div id="userInfo" class="user-info">
+                <span id="welcomeText">Welcome, <span id="username"></span>!</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-modal-content">
+            <div class="login-modal-header">
+                <h2>🔐 User Login</h2>
+                <span class="login-close" onclick="closeLoginModal()">&times;</span>
+            </div>
+            <div class="login-modal-body">
+                <form id="loginForm">
+                    <div class="login-form-group">
+                        <label for="loginUsername">Username:</label>
+                        <input type="text" id="loginUsername" name="username" required>
+                        <div class="login-error-message" id="usernameLoginError"></div>
+                    </div>
+                    <div class="login-form-group">
+                        <label for="loginPassword">Password:</label>
+                        <input type="password" id="loginPassword" name="password" required>
+                        <div class="login-error-message" id="passwordLoginError"></div>
+                    </div>
+                    <div class="login-buttons">
+                        <button type="button" class="login-btn login-btn-cancel" onclick="closeLoginModal()">Cancel</button>
+                        <button type="submit" class="login-btn login-btn-submit">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-container" id="mainContainer">
+        <div class="form-header">
+            <h1 class="form-title">Advanced Materials Testing</h1>
+            <p class="form-subtitle">Advanced Materials Testing Configuration</p>
+            <div class="progress-bar"></div>
+        </div>
+        <div class="grid-container">
+            <!-- Excel Export Section -->
+            <div class="grid-section section-excel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">
+                            <a href="{% url 'mechanical_inspection_report' %}" class="excel-btn">Excel</a>
+                            <div> Export & Search</div>
+                        </div>
+                        <div class="section-description">Export data to Excel</div>
+                    </div>
+                    <div class="section-actions">
+                        <button class="action-btn tooltip" data-tooltip="More options" onclick="showMenu(this)">⋮</button>
+                        <button class="action-btn close-btn tooltip" data-tooltip="Close section" onclick="closeSection(this)">✕</button>
+                    </div>
+                </div>
+                
+                <!-- Banner 300x250 Advertisement within Export & Search Section -->
+                <div style="text-align: center; padding: 20px; border-top: 1px solid #e2e8f0; margin-top: 15px;">
+                    <script type="text/javascript">
+                        atOptions = {
+                            'key' : 'dee4cb50186dd1dd9c46c9ee15b48fc9',
+                            'format' : 'iframe',
+                            'height' : 250,
+                            'width' : 300,
+                            'params' : {}
+                        };
+                    </script>
+                    <script type="text/javascript" src="//www.highperformanceformat.com/dee4cb50186dd1dd9c46c9ee15b48fc9/invoke.js"></script>
+                </div>
+            </div>
+
+            <!-- Parameters Sample Section -->
+            <div class="grid-section section-primary">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">Sample Parameters</div>
+                        <div class="section-description">Basic sample identification and properties</div>
+                    </div>
+                    <div class="section-actions">
+                        <button class="action-btn tooltip" data-tooltip="More options" onclick="showMenu(this)">⋮</button>
+                        <button class="action-btn close-btn tooltip" data-tooltip="Close section" onclick="closeSection(this)">✕</button>
+                    </div>
+                </div>
+                <div class="field-grid">
+                    <div class="field-row">
+                        <span class="field-counter">1</span>
+                        <label class="field-label">Sample Number</label>
+                        <input type="text" class="field-input" placeholder="Enter sample identification number" data-field="sample_number">
+                    </div>
+                    <div class="field-row">
+                        <span class="field-counter">2</span>
+                        <label class="field-label">Heat Number</label>
+                        <input type="text" class="field-input" placeholder="Enter heat treatment number" data-field="heat_number">
+                        <div class="drag-handle">⋮⋮</div>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-counter">3</span>
+                        <label class="field-label required">Mass</label>
+                        <input type="number" class="field-input" placeholder="Enter mass value (grams)" data-field="mass" required>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-counter">4</span>
+                        <label class="field-label required">Length</label>
+                        <input type="number" class="field-input" placeholder="Enter length value (mm)" data-field="length" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Water System Parameters -->
+            <div class="grid-section section-secondary">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">Water System</div>
+                        <div class="section-description">Cooling system parameters and measurements</div>
+                    </div>
+                    <div class="section-actions">
+                        <button class="action-btn tooltip" data-tooltip="More options" onclick="showMenu(this)">⋮</button>
+                        <button class="action-btn close-btn tooltip" data-tooltip="Close section" onclick="closeSection(this)">✕</button>
+                    </div>
+                </div>
+                <div class="field-grid">
+                    <div class="field-row">
+                        <span class="field-counter">5</span>
+                        <label class="field-label">Water Pressure In</label>
+                        <input type="number" class="field-input" placeholder="Enter inlet pressure (bar)" data-field="water_pressure_in">
+                    </div>
+                    <div class="field-row">
+                        <span class="field-counter">6</span>
+                        <label class="field-label">Water Pressure Out</label>
+                        <input type="number" class="field-input" placeholder="Enter outlet pressure (bar)" data-field="water_pressure_out">
+                    </div>
+                    <div class="field-row">
+                        <span class="field-counter">7</span>
+                        <label class="field-label">Water In Temperature</label>
+                        <input type="number" class="field-input" placeholder="Enter inlet temperature (°C)" data-field="water_in_temperature">
+                    </div>
+                    <div class="field-row">
+                        <span class="field-counter">8</span>
+                        <label class="field-label">Water Out Temperature</label>
+                        <input type="number" class="field-input" placeholder="Enter outlet temperature (°C)" data-field="water_out_temperature">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scale Measurements -->
+            <div class="grid-section section-tertiary">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">Scale & Load Measurements</div>
+                        <div class="section-description">UTN scale and mechanical load testing data</div>
+                    </div>
+                    <div class="section-actions">
+                        <button class="action-btn tooltip" data-tooltip="More options" onclick="showMenu(this)">⋮</button>
+                        <button class="action-btn close-btn tooltip" data-tooltip="Close section" onclick="closeSection(this)">✕</button>
+                    </div>
+                </div>
+                <div class="field-grid">
+                    <div class="field-row">
+                        <span class="field-counter">9</span>
+                        <label class="field-label required">UTN Scale</label>
+                        <input type="number" class="field-input" placeholder="Enter UTN scale value" data-field="utn_scale" required>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-counter">10</span>
+                        <label class="field-label required">Yield Load Main Scale</label>
+                        <input type="number" class="field-input" placeholder="Enter yield load (kN)" data-field="yield_load_main_scale" required>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-counter">11</span>
+                        <label class="field-label required">Yield Load Counter Part</label>
+                        <input type="number" class="field-input" placeholder="Enter counter yield load (kN)" data-field="yield_load_counter_part" required>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-counter">12</span>
+                        <label class="field-label required">Tensile Load Main Scale</label>
+                        <input type="number" class="field-input" placeholder="Enter tensile load (kN)" data-field="tensile_load_main_scale" required>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-counter">13</span>
+                        <label class="field-label required">Tensile Load Counter Part</label>
+                        <input type="number" class="field-input" placeholder="Enter counter tensile load (kN)" data-field="tensile_load_counter_part" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Section -->
+            <div class="submit-section">
+                <h3 class="submit-heading">Complete Your Submission</h3>
+                <button class="submit-btn" onclick="submitForm()">
+                    <span id="submit-text">Submit Parameters</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {% load static %}
+    <script src="{% static 'amt/amt.js' %}"></script>
+    <script>
+        // Global login state
+        let isUserLoggedIn = false;
+
+        // Login Modal Functions
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
+            document.getElementById('loginForm').reset();
+            hideAllLoginErrors();
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            hideAllLoginErrors();
+        }
+
+        function hideAllLoginErrors() {
+            document.getElementById('usernameLoginError').style.display = 'none';
+            document.getElementById('passwordLoginError').style.display = 'none';
+        }
+
+        function showLoginError(fieldId, message) {
+            const errorElement = document.getElementById(fieldId + 'LoginError');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function showSuccessMessage() {
+            const successMsg = document.getElementById('successMessage');
+            successMsg.classList.add('show');
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 4000);
+        }
+
+        function updateUIAfterLogin(username) {
+            document.getElementById('loginRequiredOverlay').style.display = 'none';
+            document.getElementById('mainContainer').classList.remove('content-disabled');
+            document.getElementById('loginButton').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'flex';
+            document.getElementById('username').textContent = username;
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('username', username);
+            isUserLoggedIn = true;
+            showSuccessMessage();
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            isUserLoggedIn = false;
+            document.getElementById('loginRequiredOverlay').style.display = 'flex';
+            document.getElementById('mainContainer').classList.add('content-disabled');
+            document.getElementById('loginButton').style.display = 'block';
+            document.getElementById('userInfo').style.display = 'none';
+            alert('Successfully logged out!');
+        }
+
+        function checkLoginState() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const username = localStorage.getItem('username');
+            
+            if (isLoggedIn === 'true' && username) {
+                isUserLoggedIn = true;
+                document.getElementById('loginRequiredOverlay').style.display = 'none';
+                document.getElementById('mainContainer').classList.remove('content-disabled');
+                document.getElementById('loginButton').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('username').textContent = username;
+            } else {
+                isUserLoggedIn = false;
+                document.getElementById('loginRequiredOverlay').style.display = 'flex';
+                document.getElementById('mainContainer').classList.add('content-disabled');
+                document.getElementById('loginButton').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'none';
+            }
+        }
+
+        function requireLogin() {
+            if (!isUserLoggedIn) {
+                showLoginModal();
+                return false;
+            }
+            return true;
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                closeLoginModal();
+            }
+        }
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            hideAllLoginErrors();
+            
+            if (!username) {
+                showLoginError('username', 'Username is required');
+                return;
+            }
+            
+            if (!password) {
+                showLoginError('password', 'Password is required');
+                return;
+            }
+            
+            const submitBtn = document.querySelector('.login-btn-submit');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Logging in...';
+            
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            
+            fetch('/user-login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    closeLoginModal();
+                    updateUIAfterLogin(data.username);
+                } else {
+                    if (data.field === 'username') {
+                        showLoginError('username', data.message);
+                    } else if (data.field === 'password') {
+                        showLoginError('password', data.message);
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during login. Please try again.');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        });
+
+        // Function to get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function submitForm() {
+            if (!requireLogin()) return;
+
+            const inputs = document.querySelectorAll('.field-input');
+            const formData = {};
+            const submitBtn = document.querySelector('.submit-btn');
+            const submitText = document.getElementById('submit-text');
+            let hasErrors = false;
+
+            // Reset previous error states
+            inputs.forEach(input => {
+                input.classList.remove('error', 'success');
+            });
+
+            // Organize data into model categories
+            formData.sample_parameters = {};
+            formData.water_system = {};
+            formData.scale_load_measurements = {};
+            
+            // Collect data and validate
+            inputs.forEach(input => {
+                const fieldName = input.dataset.field;
+                const value = input.value.trim();
+                
+                if (fieldName) {
+                    // Categorize fields into appropriate models
+                    if (['sample_id', 'sample_type', 'sample_description', 'sample_length', 'sample_diameter', 'mass', 'length', 'sample_number', 'heat_number'].includes(fieldName)) {
+                        formData.sample_parameters[fieldName] = value;
+                    }
+                    else if (['water_temperature', 'water_ph', 'water_conductivity', 'water_hardness', 'water_pressure_in', 'water_pressure_out', 'water_in_temperature', 'water_out_temperature'].includes(fieldName)) {
+                        formData.water_system[fieldName] = value;
+                    }
+                    else if (['yield_load_main_scale', 'yield_load_counter_part', 'tensile_load_main_scale', 'tensile_load_counter_part', 'utn_scale'].includes(fieldName)) {
+                        formData.scale_load_measurements[fieldName] = value;
+                    }
+                    else {
+                        // Other fields not belonging to specific models
+                        formData[fieldName] = value;
+                    }
+                    
+                    // Validate required fields
+                    if (input.hasAttribute('required') && !value) {
+                        input.classList.add('error');
+                        hasErrors = true;
+                    } else if (value) {
+                        input.classList.add('success');
+                    }
+                }
+            });
+
+            if (hasErrors) {
+                submitText.textContent = 'Please fill required fields';
+                setTimeout(() => {
+                    submitText.textContent = 'Submit Parameters';
+                }, 2000);
+                return;
+            }
+
+            // Show loading state
+            submitBtn.classList.add('loading');
+            submitText.textContent = 'Submitting...';
+            
+            // Send data to server
+            fetch('/advanced_materials_testing/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                
+                if (data.status === 'success') {
+                    // Show success state
+                    submitText.textContent = 'Calculations Complete!';
+                    document.querySelector('.form-container').style.transform = 'scale(0.98)';
+                    document.querySelector('.form-container').style.opacity = '0.8';
+                    
+                    // Redirect to analysis results page
+                    setTimeout(() => {
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            window.location.href = '/analysis_results/';
+                        }
+                    }, 1000);
+                } else {
+                    // Show error state
+                    submitText.textContent = data.message || 'Error submitting form';
+                    submitBtn.classList.remove('loading');
+                    setTimeout(() => {
+                        submitText.textContent = 'Submit Parameters';
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                submitText.textContent = 'Error submitting form';
+                submitBtn.classList.remove('loading');
+                setTimeout(() => {
+                    submitText.textContent = 'Submit Parameters';
+                }, 2000);
+            });
+        }
+
+        function closeSection(button) {
+            if (!requireLogin()) return;
+            const section = button.closest('.grid-section');
+            section.style.transform = 'translateX(100%)';
+            section.style.opacity = '0';
+            setTimeout(() => {
+                section.style.display = 'none';
+            }, 300);
+        }
+
+        function showMenu(button) {
+            if (!requireLogin()) return;
+            const options = [
+                '📝 Edit Section',
+              '📋 Duplicate Section', 
+                '🗑️ Delete Section',
+                '➕ Add Field',
+                '📊 View Data',
+                '⚙️ Settings'
+            ];
+            
+            const choice = prompt('Select an option:\n\n' + options.map((opt, i) => `${i + 1}. ${opt}`).join('\n'));
+            
+            if (choice) {
+                const optionIndex = parseInt(choice) - 1;
+                if (optionIndex >= 0 && optionIndex < options.length) {
+                    alert(`Selected: ${options[optionIndex]}`);
+                }
+            }
+        }
+
+        // Real-time validation
+        document.querySelectorAll('.field-input').forEach(input => {
+            input.addEventListener('input', function() {
+                if (!isUserLoggedIn) return;
+                this.classList.remove('error');
+                
+                if (this.value.trim() && this.hasAttribute('required')) {
+                    this.classList.add('success');
+                } else {
+                    this.classList.remove('success');
+                }
+            });
+
+            input.addEventListener('blur', function() {
+                if (!isUserLoggedIn) return;
+                if (this.hasAttribute('required') && !this.value.trim()) {
+                    this.classList.add('error');
+                }
+            });
+        });
+
+        // Drag and drop functionality
+        let draggedElement = null;
+
+        document.querySelectorAll('.drag-handle').forEach(handle => {
+            handle.addEventListener('mousedown', function(e) {
+                if (!requireLogin()) return;
+                draggedElement = this.closest('.field-row');
+                draggedElement.style.opacity = '0.6';
+                draggedElement.style.transform = 'rotate(2deg)';
+                document.body.style.cursor = 'grabbing';
+            });
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (draggedElement) {
+                draggedElement.style.opacity = '1';
+                draggedElement.style.transform = 'none';
+                document.body.style.cursor = 'default';
+                draggedElement = null;
+            }
+        });
+
+        // Auto-save functionality (simulated)
+        let autoSaveTimeout;
+        document.querySelectorAll('.field-input').forEach(input => {
+            input.addEventListener('input', function() {
+                if (!isUserLoggedIn) return;
+                clearTimeout(autoSaveTimeout);
+                autoSaveTimeout = setTimeout(() => {
+                    console.log('Auto-saved:', this.dataset.field, this.value);
+                }, 2000);
+            });
+        });
+
+        // Enhanced select styling
+        document.querySelectorAll('.field-select').forEach(select => {
+            select.addEventListener('change', function() {
+                if (!isUserLoggedIn) return;
+                if (this.value) {
+                    this.classList.add('success');
+                    this.classList.remove('error');
+                }
+            });
+        });
+
+        // Excel export functionality
+        function exportToExcel() {
+            if (!requireLogin()) return;
+            const excelBtn = document.querySelector('.excel-btn');
+            const originalText = excelBtn.textContent;
+            
+            // Show loading state
+            excelBtn.textContent = 'Exporting...';
+            excelBtn.disabled = true;
+            excelBtn.style.background = '#d97706';
+            
+            // Simulate export process
+            setTimeout(() => {
+                // Get form data for export
+                const formData = {};
+                document.querySelectorAll('.field-input').forEach(input => {
+                    if (input.dataset.field && input.value.trim()) {
+                        formData[input.dataset.field] = input.value.trim();
+                    }
+                });
+                
+                console.log('Exporting to Excel:', formData);
+                alert('Excel export started!\n\nData has been prepared for download.\nCheck your downloads folder for the Excel file.');
+                
+                // Reset button state
+                excelBtn.textContent = originalText;
+                excelBtn.disabled = false;
+                excelBtn.style.background = '';
+            }, 1500);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginState();
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-version">
+                © 2025–2026 Version: 4.1
+            </div>
+            <hr>
+            <div class="footer-developer">
+                Founder & Developer of Web application: Sanjeew Aroshana
+            </div>
+            <div class="footer-updated">
+                Last Updated: Aug 02, 2025
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

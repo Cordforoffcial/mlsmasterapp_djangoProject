@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Inspection Report - Mechanical Properties</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .btn-print {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-print:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-export {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-export:hover {
+            background-color: #e0a800;
+        }
+        
+        .btn-reset {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-reset:hover {
+            background-color: #c82333;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #dc3545;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-btn-submit {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .modal-btn-submit:hover {
+            background-color: #c82333;
+        }
+        
+        .modal-btn-submit:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .modal-btn-cancel {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .modal-btn-cancel:hover {
+            background-color: #5a6268;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .warning-text {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        /* Login Required Overlay */
+        .login-required-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-required-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            margin: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .login-required-content h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        
+        .login-required-content p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .login-required-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .login-required-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Disabled state for form elements */
+        .content-disabled {
+            pointer-events: none;
+            opacity: 0.3;
+            filter: blur(2px);
+        }
+        
+        /* Lock icon for visual indication */
+        .lock-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        /* Login Modal Styles */
+        .login-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+        }
+        
+        .login-modal-content {
+            background-color: #ffffff;
+            margin: 10% auto;
+            padding: 0;
+            border: none;
+            border-radius: 15px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .login-modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            position: relative;
+        }
+        
+        .login-modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .login-close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        
+        .login-close:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        .login-modal-body {
+            padding: 30px;
+        }
+        
+        .login-form-group {
+            margin-bottom: 20px;
+        }
+        
+        .login-form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .login-form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .login-form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .login-error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .login-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .login-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .login-btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .login-btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .login-btn-submit:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .login-btn-cancel {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .login-btn-cancel:hover {
+            background: #7f8c8d;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 25px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .navbar-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .home-btn {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s ease;
+        }
+
+        .home-btn:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+        .login-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 15px;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-left: 15px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        /* Success Message */
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+            z-index: 3000;
+            display: none;
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        @media print {
+            .button-container {
+                display: none;
+            }
+            .modal {
+                display: none !important;
+            }
+            .navbar {
+                display: none;
+            }
+            .login-required-overlay {
+                display: none !important;
+            }
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            padding: 15px;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+            text-decoration: underline;
+            padding: 0;
+        }
+        
+        .header-info {
+            display: flex;
+            flex-direction: column;
+            width: 30%;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+            padding: 0;
+        }
+        
+        .header-item {
+            border-bottom: 1px solid #333;
+            padding: 0;
+            display: flex;
+            margin: 0;
+        }
+        
+        .header-item:last-child {
+            border-bottom: none;
+        }
+        
+        .header-label {
+            font-weight: bold;
+            background-color: #f0f0f0;
+            padding: 6px 10px;
+            border-right: 1px solid #333;
+            min-width: 80px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+        }
+        
+        .header-value {
+            padding: 6px 10px;
+            flex: 1;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+        }
+        
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #333;
+            margin: 25px 0 0 0;
+        }
+        
+        .main-table th,
+        .main-table td {
+            border: 1px solid #333;
+            padding: 10px 8px;
+            text-align: center;
+            font-size: 12px;
+            margin: 0;
+            vertical-align: middle;
+        }
+        
+        .main-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        
+        .row-header {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        
+        .data-row:nth-child(even) {
+            background-color: #fafafa;
+        }
+        
+        .data-row:nth-child(odd) {
+            background-color: white;
+        }
+        
+        .summary-row {
+            background-color: #e8e8e8;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 1200px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .main-table {
+                font-size: 10px;
+            }
+            
+            .main-table th,
+            .main-table td {
+                padding: 6px 4px;
+            }
+            
+            .header-label,
+            .header-value {
+                padding: 5px 8px;
+                font-size: 10px;
+            }
+            
+            .header-info {
+                width: 40%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                margin-bottom: 15px;
+                font-size: 18px;
+            }
+            
+            .header-info {
+                margin-bottom: 15px;
+                width: 60%;
+            }
+            
+            .main-table {
+                margin: 15px 0 0 0;
+                font-size: 9px;
+            }
+            
+            .main-table th,
+            .main-table td {
+                padding: 4px 2px;
+            }
+            
+            .header-label,
+            .header-value {
+                padding: 4px 6px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Success Message -->
+    <div id="successMessage" class="success-message">
+        <strong>✓ Successfully Logged In!</strong>
+        <p>Welcome to Mechanical Properties Report.</p>
+    </div>
+
+    <!-- Login Required Overlay -->
+    <div id="loginRequiredOverlay" class="login-required-overlay">
+        <div class="login-required-content">
+            <div class="lock-icon">🔒</div>
+            <h2>Login Required</h2>
+            <p>You must be logged in to access the Mechanical Properties Report system. Please log in to view and manage inspection data.</p>
+            <button class="login-required-btn" onclick="showLoginModal()">
+                Login to Continue
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="navbar-left">
+            <button class="home-btn" onclick="goHome()">
+                🏠 Home
+            </button>
+        </div>
+        
+        <div class="navbar-right">
+            <!-- Login Button -->
+            <button id="loginButton" class="login-button" onclick="showLoginModal()">
+                Login
+            </button>
+            
+            <!-- User Info (hidden by default) -->
+            <div id="userInfo" class="user-info">
+                <span id="welcomeText">Welcome, <span id="username"></span>!</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-modal-content">
+            <div class="login-modal-header">
+                <h2>🔐 User Login</h2>
+                <span class="login-close" onclick="closeLoginModal()">&times;</span>
+            </div>
+            <div class="login-modal-body">
+                <form id="loginForm">
+                    <div class="login-form-group">
+                        <label for="loginUsername">Username:</label>
+                        <input type="text" id="loginUsername" name="username" required>
+                        <div class="login-error-message" id="usernameLoginError"></div>
+                    </div>
+                    <div class="login-form-group">
+                        <label for="loginPassword">Password:</label>
+                        <input type="password" id="loginPassword" name="password" required>
+                        <div class="login-error-message" id="passwordLoginError"></div>
+                    </div>
+                    <div class="login-buttons">
+                        <button type="button" class="login-btn login-btn-cancel" onclick="closeLoginModal()">Cancel</button>
+                        <button type="submit" class="login-btn login-btn-submit">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <h1>Final Inspection Report – Mechanical Properties</h1>
+        
+        <div class="button-container">
+            <button class="btn btn-print" onclick="printPDF()">Print PDF</button>
+            <button class="btn btn-export" onclick="exportCSV()">Export CSV</button>
+            <button class="btn btn-reset" onclick="showResetModal()">Reset</button>
+        </div>
+        
+        <div class="header-info">
+            <div class="header-item">
+                <div class="header-label">Section</div>
+                <div class="header-value">{{ header_data.section }}</div>
+            </div>
+            <div class="header-item">
+                <div class="header-label">Lot No</div>
+                <div class="header-value">{{ header_data.lot_no }}</div>
+            </div>
+            <div class="header-item">
+                <div class="header-label">Date of Rolling</div>
+                <div class="header-value">{{ header_data.date_of_rolling }}</div>
+            </div>
+        </div>
+        
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th rowspan="2">S. No</th>
+                    <th rowspan="2">Heat Number</th>
+                    <th rowspan="2">Time</th>
+                    <th rowspan="2">Mass</th>
+                    <th rowspan="2">Length</th>
+                    <th rowspan="2">Mass / Meter</th>
+                    <th rowspan="2">Cross Sec Area</th>
+                    <th rowspan="2">Calibrated Yield Load</th>
+                    <th rowspan="2">YIELD STRESS N/mm²</th>
+                    <th rowspan="2">Calibrated Tensile Load</th>
+                    <th rowspan="2">TENSILE STRESS N/mm²</th>
+                    <th rowspan="2">Elongation %</th>
+                    <th rowspan="2">Bend Test</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in table_data %}
+                <tr class="data-row">
+                    <td class="row-header">{{ row.serial_no }}</td>
+                    <td>{{ row.heat_number }}</td>
+                    <td>{{ row.time }}</td>
+                    <td>{{ row.mass }}</td>
+                    <td>{{ row.length }}</td>
+                    <td>{{ row.mass_per_meter }}</td>
+                    <td>{{ row.cross_section_area }}</td>
+                    <td>{{ row.calibrated_yield_load }}</td>
+                    <td>{{ row.yield_stress }}</td>
+                    <td>{{ row.calibrated_tensile_load }}</td>
+                    <td>{{ row.tensile_stress }}</td>
+                    <td>{{ row.elongation }}</td>
+                    <td>{{ row.bend_test }}</td>
+                </tr>
+                {% empty %}
+                {% for i in "123456789012345"|make_list %}
+                <tr class="data-row">
+                    <td class="row-header">{{ forloop.counter }}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
+                
+                {% if table_data %}
+                <tr class="summary-row">
+                    <td class="row-header">Min</td>
+                    <td></td>
+                    <td></td>
+                    <td>{{ summary_data.mass.min }}</td>
+                    <td>{{ summary_data.length.min }}</td>
+                    <td>{{ summary_data.mass_per_meter.min }}</td>
+                    <td>{{ summary_data.cross_section_area.min }}</td>
+                    <td>{{ summary_data.calibrated_yield_load.min }}</td>
+                    <td>{{ summary_data.yield_stress.min }}</td>
+                    <td>{{ summary_data.calibrated_tensile_load.min }}</td>
+                    <td>{{ summary_data.tensile_stress.min }}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="summary-row">
+                    <td class="row-header">Max</td>
+                    <td></td>
+                    <td></td>
+                    <td>{{ summary_data.mass.max }}</td>
+                    <td>{{ summary_data.length.max }}</td>
+                    <td>{{ summary_data.mass_per_meter.max }}</td>
+                    <td>{{ summary_data.cross_section_area.max }}</td>
+                    <td>{{ summary_data.calibrated_yield_load.max }}</td>
+                    <td>{{ summary_data.yield_stress.max }}</td>
+                    <td>{{ summary_data.calibrated_tensile_load.max }}</td>
+                    <td>{{ summary_data.tensile_stress.max }}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="summary-row">
+                    <td class="row-header">AVG</td>
+                    <td></td>
+                    <td></td>
+                    <td>{{ summary_data.mass.avg }}</td>
+                    <td>{{ summary_data.length.avg }}</td>
+                    <td>{{ summary_data.mass_per_meter.avg }}</td>
+                    <td>{{ summary_data.cross_section_area.avg }}</td>
+                    <td>{{ summary_data.calibrated_yield_load.avg }}</td>
+                    <td>{{ summary_data.yield_stress.avg }}</td>
+                    <td>{{ summary_data.calibrated_tensile_load.avg }}</td>
+                    <td>{{ summary_data.tensile_stress.avg }}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                {% else %}
+                <tr class="summary-row">
+                    <td class="row-header">Min</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="summary-row">
+                    <td class="row-header">Max</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="summary-row">
+                    <td class="row-header">AVG</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="resetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚠️ System Reset</h2>
+            </div>
+            <div class="warning-text">
+                <strong>Warning:</strong> This action will permanently delete ALL data from the System. This cannot be undone!
+            </div>
+            <div class="form-group">
+                <label for="resetUsername">Username:</label>
+                <input type="text" id="resetUsername" name="username" required>
+                <div class="error-message" id="usernameError"></div>
+            </div>
+            <div class="form-group">
+                <label for="resetPassword">Password:</label>
+                <input type="password" id="resetPassword" name="password" required>
+                <div class="error-message" id="passwordError"></div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="modal-btn modal-btn-cancel" onclick="closeResetModal()">Cancel</button>
+                <button type="button" class="modal-btn modal-btn-submit" onclick="submitReset()">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global login state
+        let isUserLoggedIn = false;
+
+        // Get CSRF token function
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Login Modal Functions
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
+            document.getElementById('loginForm').reset();
+            hideAllLoginErrors();
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            hideAllLoginErrors();
+        }
+
+        function hideAllLoginErrors() {
+            document.getElementById('usernameLoginError').style.display = 'none';
+            document.getElementById('passwordLoginError').style.display = 'none';
+        }
+
+        function showLoginError(fieldId, message) {
+            const errorElement = document.getElementById(fieldId + 'LoginError');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function showSuccessMessage() {
+            const successMsg = document.getElementById('successMessage');
+            successMsg.classList.add('show');
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 4000);
+        }
+
+        function updateUIAfterLogin(username) {
+            document.getElementById('loginRequiredOverlay').style.display = 'none';
+            document.getElementById('mainContainer').classList.remove('content-disabled');
+            document.getElementById('loginButton').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'flex';
+            document.getElementById('username').textContent = username;
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('username', username);
+            isUserLoggedIn = true;
+            showSuccessMessage();
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            isUserLoggedIn = false;
+            document.getElementById('loginRequiredOverlay').style.display = 'flex';
+            document.getElementById('mainContainer').classList.add('content-disabled');
+            document.getElementById('loginButton').style.display = 'block';
+            document.getElementById('userInfo').style.display = 'none';
+            alert('Successfully logged out!');
+        }
+
+        function checkLoginState() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const username = localStorage.getItem('username');
+            
+            if (isLoggedIn === 'true' && username) {
+                isUserLoggedIn = true;
+                document.getElementById('loginRequiredOverlay').style.display = 'none';
+                document.getElementById('mainContainer').classList.remove('content-disabled');
+                document.getElementById('loginButton').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('username').textContent = username;
+            } else {
+                isUserLoggedIn = false;
+                document.getElementById('loginRequiredOverlay').style.display = 'flex';
+                document.getElementById('mainContainer').classList.add('content-disabled');
+                document.getElementById('loginButton').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'none';
+            }
+        }
+
+        function requireLogin() {
+            if (!isUserLoggedIn) {
+                showLoginModal();
+                return false;
+            }
+            return true;
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const loginModal = document.getElementById('loginModal');
+            const resetModal = document.getElementById('resetModal');
+            if (event.target === loginModal) {
+                closeLoginModal();
+            }
+            if (event.target === resetModal) {
+                closeResetModal();
+            }
+        }
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            hideAllLoginErrors();
+            
+            if (!username) {
+                showLoginError('username', 'Username is required');
+                return;
+            }
+            
+            if (!password) {
+                showLoginError('password', 'Password is required');
+                return;
+            }
+            
+            const submitBtn = document.querySelector('.login-btn-submit');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Logging in...';
+            
+            fetch('/user-login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    closeLoginModal();
+                    updateUIAfterLogin(data.username);
+                } else {
+                    if (data.field === 'username') {
+                        showLoginError('username', data.message);
+                    } else if (data.field === 'password') {
+                        showLoginError('password', data.message);
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during login. Please try again.');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        });
+
+        function printPDF() {
+            if (!requireLogin()) return;
+            window.print();
+        }
+
+        function showResetModal() {
+            if (!requireLogin()) return;
+            document.getElementById('resetModal').style.display = 'block';
+            document.getElementById('resetUsername').value = '';
+            document.getElementById('resetPassword').value = '';
+            hideAllErrors();
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').style.display = 'none';
+            document.getElementById('resetUsername').value = '';
+            document.getElementById('resetPassword').value = '';
+            hideAllErrors();
+        }
+
+        function hideAllErrors() {
+            document.getElementById('usernameError').style.display = 'none';
+            document.getElementById('passwordError').style.display = 'none';
+        }
+
+        function showError(fieldId, message) {
+            const errorElement = document.getElementById(fieldId + 'Error');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        // Fixed Submit Reset Function
+        function submitReset() {
+            console.log('Submit Reset button clicked!');
+            
+            const username = document.getElementById('resetUsername').value.trim();
+            const password = document.getElementById('resetPassword').value;
+            
+            console.log('Username:', username);
+            console.log('Password length:', password.length);
+            
+            hideAllErrors();
+            
+            if (!username) {
+                console.log('Username validation failed');
+                showError('username', 'Username is required');
+                return;
+            }
+            
+            if (!password) {
+                console.log('Password validation failed');
+                showError('password', 'Password is required');
+                return;
+            }
+            
+            const submitBtn = document.querySelector('.modal-btn-submit');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Resetting...';
+            
+            console.log('Starting reset request...');
+            
+            const csrfToken = getCookie('csrftoken');
+            console.log('CSRF Token:', csrfToken);
+            
+            const requestData = {
+                username: username,
+                password: password
+            };
+            console.log('Request data:', requestData);
+            
+            fetch('/reset-database/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.status === 'success') {
+                    alert('All Data Reset Successfully Completed');
+                    closeResetModal();
+                    window.location.reload();
+                } else {
+                    console.log('Reset failed:', data.message);
+                    if (data.field === 'username') {
+                        showError('username', data.message);
+                    } else if (data.field === 'password') {
+                        showError('password', data.message);
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('An error occurred while resetting the database. Please try again.');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        }
+
+        function calculateStatistics() {
+            if (!isUserLoggedIn) return;
+            
+            const dataRows = document.querySelectorAll('.data-row');
+            const numericalColumns = [3, 4, 5, 6, 7, 8, 9, 10, 11];
+            
+            const columnData = {};
+            numericalColumns.forEach(colIndex => {
+                columnData[colIndex] = [];
+            });
+            
+            dataRows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                numericalColumns.forEach(colIndex => {
+                    if (cells[colIndex]) {
+                        const value = parseFloat(cells[colIndex].textContent.trim());
+                        if (!isNaN(value) && value !== 0) {
+                            columnData[colIndex].push(value);
+                        }
+                    }
+                });
+            });
+            
+            const statistics = {};
+            numericalColumns.forEach(colIndex => {
+                const values = columnData[colIndex];
+                if (values.length > 0) {
+                    statistics[colIndex] = {
+                        min: Math.min(...values).toFixed(2),
+                        max: Math.max(...values).toFixed(2),
+                        avg: (values.reduce((sum, val) => sum + val, 0) / values.length).toFixed(2)
+                    };
+                } else {
+                    statistics[colIndex] = {
+                        min: '',
+                        max: '',
+                        avg: ''
+                    };
+                }
+            });
+            
+            const summaryRows = document.querySelectorAll('.summary-row');
+            
+            if (summaryRows[0]) {
+                const minCells = summaryRows[0].querySelectorAll('td');
+                numericalColumns.forEach(colIndex => {
+                    if (minCells[colIndex]) {
+                        minCells[colIndex].textContent = statistics[colIndex].min;
+                    }
+                });
+            }
+            
+            if (summaryRows[1]) {
+                const maxCells = summaryRows[1].querySelectorAll('td');
+                numericalColumns.forEach(colIndex => {
+                    if (maxCells[colIndex]) {
+                        maxCells[colIndex].textContent = statistics[colIndex].max;
+                    }
+                });
+            }
+            
+            if (summaryRows[2]) {
+                const avgCells = summaryRows[2].querySelectorAll('td');
+                numericalColumns.forEach(colIndex => {
+                    if (avgCells[colIndex]) {
+                        avgCells[colIndex].textContent = statistics[colIndex].avg;
+                    }
+                });
+            }
+        }
+
+        function makeTableEditable() {
+            const dataCells = document.querySelectorAll('.data-row td:not(.row-header)');
+            dataCells.forEach(cell => {
+                cell.contentEditable = true;
+                cell.style.cursor = 'text';
+                
+                cell.addEventListener('blur', function() {
+                    if (isUserLoggedIn) {
+                        calculateStatistics();
+                    }
+                });
+                
+                cell.addEventListener('focus', function() {
+                    if (isUserLoggedIn) {
+                        this.style.backgroundColor = '#e3f2fd';
+                    }
+                });
+                
+                cell.addEventListener('blur', function() {
+                    this.style.backgroundColor = '';
+                });
+            });
+        }
+
+        function exportCSV() {
+            if (!requireLogin()) return;
+            
+            const table = document.querySelector('.main-table');
+            const rows = table.querySelectorAll('tr');
+            
+            let csvContent = '';
+            
+            const headerInfo = document.querySelector('.header-info');
+            const headerItems = headerInfo.querySelectorAll('.header-item');
+            
+            csvContent += 'Final Inspection Report - Mechanical Properties\n';
+            csvContent += '\n';
+            
+            headerItems.forEach(item => {
+                const label = item.querySelector('.header-label').textContent.trim();
+                const value = item.querySelector('.header-value').textContent.trim();
+                csvContent += `${label},${value}\n`;
+            });
+            
+            csvContent += '\n';
+            
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('th, td');
+                const rowData = [];
+                
+                cells.forEach(cell => {
+                    let cellText = cell.textContent.trim();
+                    if (cellText.includes(',') || cellText.includes('"') || cellText.includes('\n')) {
+                        cellText = '"' + cellText.replace(/"/g, '""') + '"';
+                    }
+                    rowData.push(cellText);
+                });
+                
+                if (rowData.some(cell => cell !== '')) {
+                    csvContent += rowData.join(',') + '\n';
+                }
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const now = new Date();
+                const dateStr = now.getFullYear() + '-' + 
+                               String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                               String(now.getDate()).padStart(2, '0');
+                const timeStr = String(now.getHours()).padStart(2, '0') + '-' + 
+                               String(now.getMinutes()).padStart(2, '0');
+                const filename = `mechanical_properties_report_${dateStr}_${timeStr}.csv`;
+                
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                alert('CSV file has been downloaded successfully!');
+            } else {
+                alert('CSV export is not supported in this browser');
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginState();
+            makeTableEditable();
+            calculateStatistics();
+        });
+    </script>
+</body>
+</html>

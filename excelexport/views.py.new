@@ -1,0 +1,5 @@
+def mechanical_inspection_report(request):
+    """
+    View function for the mechanical inspection report page.
+    """
+    return render(request, 'mechanical_inspection/mechanical_inspection_report.html')

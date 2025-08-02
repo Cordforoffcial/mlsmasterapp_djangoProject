@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In-Process Inspection Report</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Login Modal Styles */
+        .login-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+        }
+        
+        .login-modal-content {
+            background-color: #ffffff;
+            margin: 10% auto;
+            padding: 0;
+            border: none;
+            border-radius: 15px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .login-modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            position: relative;
+        }
+        
+        .login-modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .login-close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        
+        .login-close:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        .login-modal-body {
+            padding: 30px;
+        }
+        
+        .login-form-group {
+            margin-bottom: 20px;
+        }
+        
+        .login-form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .login-form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .login-form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .login-error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .login-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .login-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .login-btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .login-btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .login-btn-submit:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .login-btn-cancel {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .login-btn-cancel:hover {
+            background: #7f8c8d;
+        }
+        
+        /* Login Button in Navbar */
+        .login-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 15px;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-left: 15px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+        
+        /* Success Message */
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+            z-index: 3000;
+            display: none;
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        /* Update navbar to include login button */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Login Required Overlay */
+        .login-required-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-required-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            margin: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .login-required-content h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        
+        .login-required-content p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .login-required-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .login-required-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Disabled state for form elements */
+        .content-disabled {
+            pointer-events: none;
+            opacity: 0.3;
+            filter: blur(2px);
+        }
+        
+        /* Hide navigation tabs when not logged in */
+        .nav-tabs.hidden {
+            display: none;
+        }
+        
+        .search-container.hidden {
+            display: none;
+        }
+        
+        /* Lock icon for visual indication */
+        .lock-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        /* Footer Styles */
+        .footer {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            margin-top: 50px;
+            text-align: center;
+            border-top: 3px solid #5a67d8;
+        }
+        
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .footer-version {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .footer-developer {
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        
+        .footer-updated {
+            font-size: 12px;
+            opacity: 0.8;
+            font-style: italic;
+        }
+        
+        .footer hr {
+            border: none;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Success Message -->
+    <div id="successMessage" class="success-message">
+        <strong>✓ Successfully Logged In!</strong>
+        <p>Welcome to the system.</p>
+    </div>
+
+    <!-- Login Required Overlay -->
+    <div id="loginRequiredOverlay" class="login-required-overlay">
+        <div class="login-required-content">
+            <div class="lock-icon">🔒</div>
+            <h2>Login Required</h2>
+            <p>You must be logged in to access the In-Process Inspection Report system. Please log in to continue.</p>
+            <button class="login-required-btn" onclick="showLoginModal()">
+                Login to Continue
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="navbar-left">
+            <button class="home-btn" onclick="goHome()">
+                🏠
+            </button>
+            
+            <div class="nav-tabs" id="navTabs">
+                <div class="nav-tab active" onclick="selectTab(this)">Section1</div>
+                <div class="nav-tab" onclick="navigateToAdvanced()">Advanced Materials Testing </div>
+            </div>
+        </div>
+        
+        <div class="navbar-right">
+            <div class="search-container" id="searchContainer">
+                <input type="text" class="search-input" placeholder="Search..." id="searchInput">
+                <button class="search-btn" onclick="performSearch()">
+                    🔍
+                </button>
+            </div>
+            
+            <!-- Login Button -->
+            <button id="loginButton" class="login-button" onclick="showLoginModal()">
+                Login
+            </button>
+            
+            <!-- User Info (hidden by default) -->
+            <div id="userInfo" class="user-info">
+                <span id="welcomeText">Welcome, <span id="username"></span>!</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-modal-content">
+            <div class="login-modal-header">
+                <h2>🔐 User Login</h2>
+                <span class="login-close" onclick="closeLoginModal()">&times;</span>
+            </div>
+            <div class="login-modal-body">
+                <form id="loginForm">
+                    <div class="login-form-group">
+                        <label for="loginUsername">Username:</label>
+                        <input type="text" id="loginUsername" name="username" required>
+                        <div class="login-error-message" id="usernameLoginError"></div>
+                    </div>
+                    <div class="login-form-group">
+                        <label for="loginPassword">Password:</label>
+                        <input type="password" id="loginPassword" name="password" required>
+                        <div class="login-error-message" id="passwordLoginError"></div>
+                    </div>
+                    <div class="login-buttons">
+                        <button type="button" class="login-btn login-btn-cancel" onclick="closeLoginModal()">Cancel</button>
+                        <button type="submit" class="login-btn login-btn-submit">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>In-Process Inspection Report</h1>
+            <div class="subtitle">Rolling Information</div>
+        </div>
+
+        <!-- Required Note Section -->
+        <div class="account-section">
+            <div class="required-note">
+                * Indicates required question
+            </div>
+        </div>
+
+        <!-- Form Section -->
+        <form id="inspectionForm" class="form-section">
+            <!-- Date Field -->
+            <div class="form-group">
+                <label class="form-label">
+                    Date <span class="required">*</span>
+                </label>
+                <div class="form-subtitle">Date</div>
+                <div class="date-input">
+                    <input 
+                        type="date" 
+                        class="form-input" 
+                        id="inspectionDate" 
+                        required 
+                        placeholder="yyyy-mm-dd"
+                    >
+                </div>
+            </div>
+
+            <!-- Batch Number Field -->
+            <div class="form-group">
+                <label class="form-label">
+                    Batch Number <span class="required">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    class="form-input" 
+                    id="batchNumber" 
+                    placeholder="Your answer" 
+                    required
+                >
+            </div>
+
+            <!-- Section Field -->
+            <div class="form-group">
+                <label class="form-label">
+                    Section <span class="required">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    class="form-input" 
+                    id="section" 
+                    placeholder="Your answer" 
+                    required
+                >
+            </div>
+        </form>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn-submit" onclick="submitForm()">Submit</button>
+            <button type="button" class="btn-clear" onclick="clearForm()">Clear form</button>
+        </div>
+
+        <!-- Adsterra Native Banner - Bottom of Page -->
+        <div style="text-align: center; margin: 30px 0; padding: 20px; border-top: 1px solid #e2e8f0;">
+            <script async="async" data-cfasync="false" src="//pl27322961.profitableratecpm.com/887ab73b9083a50690abc62703e29129/invoke.js"></script>
+            <div id="container-887ab73b9083a50690abc62703e29129"></div>
+        </div>
+    </div>
+
+    {% load static %}
+    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        // Global login state
+        let isUserLoggedIn = false;
+
+        // Login Modal Functions
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
+            // Clear previous form data and errors
+            document.getElementById('loginForm').reset();
+            hideAllLoginErrors();
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            hideAllLoginErrors();
+        }
+
+        function hideAllLoginErrors() {
+            document.getElementById('usernameLoginError').style.display = 'none';
+            document.getElementById('passwordLoginError').style.display = 'none';
+        }
+
+        function showLoginError(fieldId, message) {
+            const errorElement = document.getElementById(fieldId + 'LoginError');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function showSuccessMessage() {
+            const successMsg = document.getElementById('successMessage');
+            successMsg.classList.add('show');
+            
+            // Hide after 4 seconds
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 4000);
+        }
+
+        function updateUIAfterLogin(username) {
+            // Hide login required overlay
+            document.getElementById('loginRequiredOverlay').style.display = 'none';
+            
+            // Enable main content
+            document.getElementById('mainContainer').classList.remove('content-disabled');
+            
+            // Show navigation elements
+            document.getElementById('navTabs').classList.remove('hidden');
+            document.getElementById('searchContainer').classList.remove('hidden');
+            
+            // Hide login button
+            document.getElementById('loginButton').style.display = 'none';
+            
+            // Show user info
+            document.getElementById('userInfo').style.display = 'flex';
+            document.getElementById('username').textContent = username;
+            
+            // Store login state
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('username', username);
+            isUserLoggedIn = true;
+            
+            // Show success message
+            showSuccessMessage();
+        }
+
+        function logout() {
+            // Clear login state
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            isUserLoggedIn = false;
+            
+            // Show login required overlay
+            document.getElementById('loginRequiredOverlay').style.display = 'flex';
+            
+            // Disable main content
+            document.getElementById('mainContainer').classList.add('content-disabled');
+            
+            // Hide navigation elements
+            document.getElementById('navTabs').classList.add('hidden');
+            document.getElementById('searchContainer').classList.add('hidden');
+            
+            // Update UI
+            document.getElementById('loginButton').style.display = 'block';
+            document.getElementById('userInfo').style.display = 'none';
+            
+            // Clear form
+            clearForm();
+            
+            alert('Successfully logged out!');
+        }
+
+        // Check login state on page load
+        function checkLoginState() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const username = localStorage.getItem('username');
+            
+            if (isLoggedIn === 'true' && username) {
+                // User is logged in
+                isUserLoggedIn = true;
+                document.getElementById('loginRequiredOverlay').style.display = 'none';
+                document.getElementById('mainContainer').classList.remove('content-disabled');
+                document.getElementById('navTabs').classList.remove('hidden');
+                document.getElementById('searchContainer').classList.remove('hidden');
+                document.getElementById('loginButton').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('username').textContent = username;
+            } else {
+                // User is not logged in
+                isUserLoggedIn = false;
+                document.getElementById('loginRequiredOverlay').style.display = 'flex';
+                document.getElementById('mainContainer').classList.add('content-disabled');
+                document.getElementById('navTabs').classList.add('hidden');
+                document.getElementById('searchContainer').classList.add('hidden');
+                document.getElementById('loginButton').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'none';
+            }
+        }
+
+        // Prevent actions when not logged in
+        function requireLogin(action) {
+            if (!isUserLoggedIn) {
+                showLoginModal();
+                return false;
+            }
+            return true;
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                closeLoginModal();
+            }
+        }
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            // Clear previous errors
+            hideAllLoginErrors();
+            
+            // Basic validation
+            if (!username) {
+                showLoginError('username', 'Username is required');
+                return;
+            }
+            
+            if (!password) {
+                showLoginError('password', 'Password is required');
+                return;
+            }
+            
+            // Disable submit button to prevent double submission
+            const submitBtn = document.querySelector('.login-btn-submit');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Logging in...';
+            
+            // Get CSRF token
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            
+            // Send login request
+            fetch('/user-login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Close modal
+                    closeLoginModal();
+                    
+                    // Update UI
+                    updateUIAfterLogin(data.username);
+                    
+                } else {
+                    // Show error message
+                    if (data.field === 'username') {
+                        showLoginError('username', data.message);
+                    } else if (data.field === 'password') {
+                        showLoginError('password', data.message);
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during login. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        });
+
+        // Protected navigation functions
+        function navigateToAdvanced() {
+            if (requireLogin()) {
+                window.location.href = '/advanced_materials_testing/';
+            }
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        function selectTab(element) {
+            if (!requireLogin()) return;
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            element.classList.add('active');
+        }
+
+        function performSearch() {
+            if (!requireLogin()) return;
+            
+            const searchTerm = document.getElementById('searchInput').value;
+            if (searchTerm.trim()) {
+                alert('Searching for: ' + searchTerm);
+                // Implement actual search functionality here
+            }
+        }
+
+        function submitForm() {
+            if (!requireLogin()) return;
+            
+            // Existing submit form functionality
+            const date = document.getElementById('inspectionDate').value;
+            const batchNumber = document.getElementById('batchNumber').value;
+            const section = document.getElementById('section').value;
+
+            if (!date || !batchNumber || !section) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            // Submit the form data
+            const formData = {
+                date: date,
+                batchNumber: batchNumber,
+                section: section
+            };
+
+            // Send to server (existing functionality)
+            fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Inspection report submitted successfully!');
+                    clearForm();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting the form.');
+            });
+        }
+
+        function clearForm() {
+            if (!requireLogin()) return;
+            document.getElementById('inspectionForm').reset();
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginState();
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-version">
+                © 2025–2026 Version: 4.1
+            </div>
+            <hr>
+            <div class="footer-developer">
+                Founder & Developer of Web application: Sanjeew Aroshana
+            </div>
+            <div class="footer-updated">
+                Last Updated: Aug 02, 2025
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
