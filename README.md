@@ -1,4 +1,4 @@
-                                                    Materials Testing Pro
+                                                    MLS Advanced Materials Materials Testing Pro
 
 The MLS Advanced Materials Testing Web Application is a specialized web-based platform designed for advanced materials testing and in-process inspection reporting. The application provides a streamlined interface for quality control professionals and materials engineers to document and track inspection data during manufacturing processes.
 
