@@ -40,7 +40,7 @@ License
 Distributed under the MIT License. See LICENSE file for more information.
 
 
-Project Link: https://github.com/Cordforoffcial/mlsmasterapp_djangoProject/
+Project Link: https://github.com/SanjeewAroshana/mlsmasterapp_djangoProject
 
 
 <img width="1280" height="800" alt="Screenshot 2025-10-19 at 18 26 45" src="https://github.com/user-attachments/assets/dc4eb0e1-8b54-4989-9b95-8c5434b96523" />
